@@ -5,7 +5,7 @@ from flask import Flask, redirect, render_template, request, url_for
 
 app = Flask(__name__)
 openai.api_key = os.getenv("OPENAI_API_KEY")
-
+serverName = os.getenv("SERVER_NAME")
 
 @app.route("/", methods=("GET", "POST"))
 def index():
@@ -16,9 +16,16 @@ def index():
             prompt=generate_prompt(animal),
             temperature=0.6,
         )
-        return redirect(url_for("index", result=response.choices[0].text))
+        print(response.choices[0].text)
+        
+        url = url_for("index", _external=True, result=response.choices[0].text)
+        url = url.replace('localhost:5000', serverName)
+        # url = url.replace('http', 'https')
+        print(url)
+        return redirect(url)
 
     result = request.args.get("result")
+    print(f"Result is: {result}")
     return render_template("index.html", result=result)
 
 
